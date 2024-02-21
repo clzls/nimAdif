@@ -12,4 +12,5 @@ srcDir        = "src"
 requires "nim >= 2.0.2"
 
 # Additional tools
-include ./nimsc
+when withDir(thisDir(), system.fileExists("nimsc.nim")):
+  include "nimsc.nim"
