@@ -1,3 +1,3 @@
-import nimAdif / [formatter]
+import nimAdif / [formatter, parseadif]
 
-export formatter
+export formatter, parseadif
