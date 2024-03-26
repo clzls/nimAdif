@@ -7,6 +7,13 @@ import ./ [textConv]
 
 type
   EBand* {.pure.} = enum
+    e40m = "40m"
+    e30m = "30m"
+    e20m = "20m"
+    e17m = "17m"
+    e15m = "15m"
+    e12m = "12m"
+    e10m = "10m"
     e6m = "6m"
     e2m = "2m"
     e70cm = "70cm"
@@ -19,7 +26,7 @@ type
 
 type
   AdifLogSpecifierObj* = object ## ADI Data-Specifier
-    key: string
+    key*: string
     val: string
     case kind*: EItemType
     of iStr, iMultiStr, iNumberRaw, iEnumRaw:
@@ -42,8 +49,21 @@ type
     record*: seq[AdifLogRecord]
 
 
+# Errors
+type
+  AdifError* = object of IOError ## An exception that is raised if
+                                 ## a parsing or formatting error occurs.
+
+
 const
   tabBandRange: array[EBand, Slice[int]] = [
+    e40m: 7_000_000..7_300_000,
+    e30m: 10_100_000..10_150_000,
+    e20m: 14_000_000..14_350_000,
+    e17m: 18_068_000..18_168_000,
+    e15m: 21_000_000..21_450_000,
+    e12m: 24_890_000..24_990_000,
+    e10m: 28_000_000..29_700_000,
     e6m: 50_000_000..54_000_000,
     e2m: 144_000_000..148_000_000,
     e70cm: 420_000_000..450_000_000,
@@ -179,6 +199,9 @@ func add*(self: AdifLogRecord or AdifLogHeader; itm: AdifLogSpecifier) =
 func header*(self: AdifLogFile): string {.inline.} =
   if self.isNil: "" else: self.header
 
+func getStr*(self: AdifLogSpecifier): string {.inline.} =
+  if self.isNil: "" else: self.val
+
 func `header=`*(self: AdifLogFile; hrd: AdifLogHeader) {.inline.} =
   if self.isNil: raise newException(ValueError, "`self` is nil")
   self.header = hrd.dumps
@@ -191,6 +214,24 @@ proc `[]=`*(self: AdifLogRecord or AdifLogHeader; key, val: string) =
   if unlikely(self.spec.isNil):
     self.spec = newTable[string, AdifLogSpecifier]()
   self.spec[key] = newAdifLogSpecifierStr(key, val)
+
+proc getStr*(self: AdifLogRecord or AdifLogHeader; key: string): string =
+  ## Get as string quickly
+  if self.isNil: raise newException(AdifError, "`self` is nil")
+  if unlikely(self.spec.isNil):
+    raise newException(AdifError, "`self.spec` is nil")
+  if key notin self.spec:
+    raise newException(AdifError, "`key not found")
+  self.spec[key].val
+
+proc getStrOrDefault*(self: AdifLogRecord or AdifLogHeader; key, default: string): string =
+  ## Get as string quickly
+  if self.isNil: return default
+  if unlikely(self.spec.isNil):
+    return default
+  if key notin self.spec:
+    return default
+  return self.spec[key].val
 
 proc `call=`*(self: AdifLogRecord; call: string) {.inline.} =
   self["CALL"] = call

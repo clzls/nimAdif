@@ -21,3 +21,15 @@ func getTimeStrCompact*(dt: DateTime): string =
   result.add intToStr(dt.hour, 2)
   result.add intToStr(dt.minute, 2)
   result.add intToStr(dt.second, 2)
+
+proc parseInt*(s: char): int =
+  if s notin '0'..'9':
+    raise newException(ValueError, "invalid integer: " & s)
+  return s.ord - '0'.ord
+
+proc parseIntOrDefault*(s: char; default: int = 0): int =
+  if s notin '0'..'9':
+    default
+  else:
+    s.ord - '0'.ord
+
