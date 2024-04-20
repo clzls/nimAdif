@@ -20,7 +20,7 @@ type
     eOOB = "OOB"
   EItemType* {.pure.} = enum
     iStr, iMultiStr, iNumberRaw, iEnumRaw,
-    iNumber, iInt,
+    iNumber, iInt, iBool,
     iRaw,
 
 
@@ -35,6 +35,8 @@ type
       numF: BiggestFloat
     of iInt:
       numI: BiggestInt
+    of iBool:
+      numB: bool
     of iRaw:
       tyCode: string
   AdifLogSpecifier* = ref AdifLogSpecifierObj
@@ -172,6 +174,9 @@ iterator dumps*(self: AdifLogFile): string =
 func newAdifLogSpecifierStr*(key, val: string): AdifLogSpecifier =
   AdifLogSpecifier(key: key, val: val, kind: iStr)
 
+func newAdifLogSpecifierBool*(key: string; bval: bool): AdifLogSpecifier =
+  AdifLogSpecifier(key: key, val: (if bval: "Y" else: "N"), kind: iBool, numB: bval)
+
 proc newAdifLogSpecifierNumRaw*(key, val: string): AdifLogSpecifier =
   AdifLogSpecifier(key: key, val: val, kind: iNumberRaw)
 
@@ -214,6 +219,13 @@ proc `[]=`*(self: AdifLogRecord or AdifLogHeader; key, val: string) =
   if unlikely(self.spec.isNil):
     self.spec = newTable[string, AdifLogSpecifier]()
   self.spec[key] = newAdifLogSpecifierStr(key, val)
+
+proc `[]=`*(self: AdifLogRecord or AdifLogHeader; key: string; bval: bool) =
+  ## Add a string quickly
+  if self.isNil: raise newException(ValueError, "`self` is nil")
+  if unlikely(self.spec.isNil):
+    self.spec = newTable[string, AdifLogSpecifier]()
+  self.spec[key] = newAdifLogSpecifierBool(key, bval)
 
 proc getStr*(self: AdifLogRecord or AdifLogHeader; key: string): string =
   ## Get as string quickly

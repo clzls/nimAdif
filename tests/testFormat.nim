@@ -8,6 +8,24 @@
 import unittest
 
 import nimAdif
+
+
 test "Generate raw K-V pairs":
   check rawKvPair("CALL", "BI1MHK") == "<CALL:6>BI1MHK"
   check rawKvPair("CALL", "BI1MHK", "S") == "<CALL:6:S>BI1MHK"
+
+
+test "New Specifiers":
+  # Raw
+  var p = newAdifLogSpecifierRaw("QTH", "Fukushima", "S")
+  check dumps(p) == "<QTH:9>Fukushima"
+
+  # Strings
+  p = newAdifLogSpecifierStr("QTH", "Fukushima")
+  check dumps(p) == "<QTH:9>Fukushima"
+
+  # Booleans
+  p = newAdifLogSpecifierBool("QSO_RANDOM", true)
+  check dumps(p) == "<QSO_RANDOM:1>Y"
+  p = newAdifLogSpecifierBool("QSO_RANDOM", false)
+  check dumps(p) == "<QSO_RANDOM:1>N"
