@@ -175,13 +175,16 @@ proc parseField(self: var AdifParser, a: var AdifLogSpecifier): EParseSpecResl =
       inc(self.bufpos)
   if colonCnt == 0:
     if key.len == 3:
-      # 记录结束
+      # May be EOR or EOH flags
       let p = key.toUpperAscii
       if not p.startsWith("EO"): return unkFlag
       case p[2]
       of 'R': return eor
       of 'H': return eoh
       else: return unkFlag
+    elif key == "APP_LoTW_EOF":
+      # LoTW EOF flag, treat as (general) flag
+      return unkFlag
     error(self, self.bufpos, "Cannot parse field's key and length!")
   if key.len == 0:
     error(self, self.bufpos, "Cannot parse field's key!")
