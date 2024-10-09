@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.1"
+version       = "0.1.2"
 author        = "clzls"
 description   = "An Amateur Data Interchange Format (ADIF) formatter and parser library written purely in Nim."
 license       = "MIT"
